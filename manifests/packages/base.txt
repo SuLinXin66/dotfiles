@@ -8,4 +8,3 @@ ca-certificates|linux|auto|HTTPS 证书集合
 rsync|linux|auto|文件同步工具
 unzip|linux|auto|zip 解压工具
 zip|linux|auto|zip 打包工具
-stow|linux|auto|dotfiles 软链接管理工具

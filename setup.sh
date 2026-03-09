@@ -122,6 +122,12 @@ main() {
   cli::require_no_args "setup.sh"
 
   export PROJECT_ROOT
+  if [[ -z "${PKG_REFRESH_STATE_FILE:-}" ]]; then
+    PKG_REFRESH_STATE_FILE="$(mktemp "/tmp/dotfiles-pkg-refresh.XXXXXX")"
+    export PKG_REFRESH_STATE_FILE
+    trap 'rm -f "${PKG_REFRESH_STATE_FILE:-}"' EXIT
+  fi
+
   declare -A FUNC_INDEX=()
 
   build_func_index

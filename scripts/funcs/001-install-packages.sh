@@ -38,6 +38,8 @@ PKG_MANIFEST_DIR|${PROJECT_ROOT}/manifests/packages|软件包清单目录
 PKG_INSTALL_LOG_ENABLE|0|是否打印安装前清单日志（1=开启，0=关闭）
 PKG_OS_OVERRIDE||强制系统过滤（如 arch/ubuntu/all），为空则按当前系统自动匹配
 PKG_TARGET_OVERRIDE||兼容旧变量名（等价于 PKG_OS_OVERRIDE）
+PKG_REFRESH_ENABLE|1|是否启用包索引刷新（1=开启，0=关闭）
+PKG_PACMAN_REFRESH_MODE|sync|pacman/yay/paru 刷新模式（sync|force|skip）
 EOF
 }
 
@@ -67,33 +69,7 @@ run_impl() {
     return 0
   }
 
-  local -a entries=()
-  parse_manifest_entries manifest_files entries
-
-  [[ ${#entries[@]} -gt 0 ]] || {
-    log::warn "No valid package entries found in manifests"
-    return 0
-  }
-
-  local -A manager_pkgs=()
-  local -a manager_order=()
-  group_entries_by_manager entries manager_pkgs manager_order "$os_override"
-
-  if [[ "$install_log_enable" == "1" ]]; then
-    print_install_plan entries "" "$os_override"
-  fi
-
-  local pkg_manager
-  local pkg_line
-  local -a pkgs=()
-  for pkg_manager in "${manager_order[@]}"; do
-    pkg_line="${manager_pkgs[$pkg_manager]}"
-    read -r -a pkgs <<< "$pkg_line"
-    [[ ${#pkgs[@]} -gt 0 ]] || continue
-
-    log::info "Installing by pkg_manager [$pkg_manager]: ${pkgs[*]}"
-    pkg::install_with_backend "$pkg_manager" "${pkgs[@]}"
-  done
+  process_manifest_files manifest_files "$os_override" "$install_log_enable" ""
 
   log::ok "Package installation completed"
 }
@@ -124,35 +100,63 @@ dry_run_impl() {
     return 0
   }
 
-  local -a entries=()
-  parse_manifest_entries manifest_files entries
-
-  [[ ${#entries[@]} -gt 0 ]] || {
-    log::warn "No valid package entries found in manifests"
-    return 0
-  }
-
-  local -A manager_pkgs=()
-  local -a manager_order=()
-  group_entries_by_manager entries manager_pkgs manager_order "$os_override"
-
-  if [[ "$install_log_enable" == "1" ]]; then
-    print_install_plan entries "[DRY-RUN] " "$os_override"
-  fi
-
-  local pkg_manager
-  local pkg_line
-  local -a pkgs=()
-  for pkg_manager in "${manager_order[@]}"; do
-    pkg_line="${manager_pkgs[$pkg_manager]}"
-    read -r -a pkgs <<< "$pkg_line"
-    [[ ${#pkgs[@]} -gt 0 ]] || continue
-
-    log::info "[DRY-RUN] Installing by pkg_manager [$pkg_manager]: ${pkgs[*]}"
-    pkg::install_with_backend "$pkg_manager" "${pkgs[@]}"
-  done
+  process_manifest_files manifest_files "$os_override" "$install_log_enable" "[DRY-RUN] "
 
   log::ok "[DRY-RUN] Package installation preview completed"
+}
+
+process_manifest_files() {
+  local -n manifest_files_ref="$1"
+  local os_override="$2"
+  local install_log_enable="$3"
+  local prefix="$4"
+
+  local file file_base
+  local -a single_file=() entries=() pkgs=()
+  local -A manager_pkgs=()
+  local -a manager_order=()
+  local pkg_manager pkg_line
+  local installed_any=0
+
+  for file in "${manifest_files_ref[@]}"; do
+    file_base="$(basename "$file")"
+    single_file=("$file")
+    entries=()
+    manager_pkgs=()
+    manager_order=()
+
+    parse_manifest_entries single_file entries
+
+    [[ ${#entries[@]} -gt 0 ]] || continue
+
+    group_entries_by_manager entries manager_pkgs manager_order "$os_override"
+    [[ ${#manager_order[@]} -gt 0 ]] || continue
+
+    if [[ "$install_log_enable" == "1" ]]; then
+      print_install_plan entries "$prefix" "$os_override"
+    fi
+
+    for pkg_manager in "${manager_order[@]}"; do
+      pkg_line="${manager_pkgs[$pkg_manager]}"
+      read -r -a pkgs <<< "$pkg_line"
+      [[ ${#pkgs[@]} -gt 0 ]] || continue
+
+      if [[ "$install_log_enable" == "1" ]]; then
+        log::info "${prefix}Installing file [${file_base}] by pkg_manager [${pkg_manager}]: ${pkgs[*]}"
+      fi
+
+      pkg::install_with_backend "$pkg_manager" "${pkgs[@]}"
+      installed_any=1
+    done
+
+    if [[ "$install_log_enable" == "1" ]]; then
+      log::ok "${prefix}[FILE] completed: ${file_base}"
+    fi
+  done
+
+  if [[ "$installed_any" == "0" ]]; then
+    log::warn "No valid package entries matched current target"
+  fi
 }
 
 parse_manifest_entries() {

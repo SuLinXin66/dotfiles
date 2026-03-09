@@ -2,6 +2,60 @@
 
 declare -Ag PKG_REFRESH_DONE=()
 
+# 是否启用索引刷新（默认启用）。
+# 环境变量:
+#   PKG_REFRESH_ENABLE=1|0
+pkg::refresh_enabled() {
+  [[ "${PKG_REFRESH_ENABLE:-1}" == "1" ]]
+}
+
+# pacman 系列刷新模式。
+# 环境变量:
+#   PKG_PACMAN_REFRESH_MODE=sync|force|skip
+pkg::pacman_refresh_mode() {
+  local mode="${PKG_PACMAN_REFRESH_MODE:-sync}"
+  mode="${mode,,}"
+
+  case "$mode" in
+    sync|force|skip)
+      printf "%s\n" "$mode"
+      ;;
+    *)
+      log::die "Unsupported PKG_PACMAN_REFRESH_MODE: $mode (allowed: sync|force|skip)"
+      ;;
+  esac
+}
+
+pkg::is_refresh_done() {
+  local backend="$1"
+
+  if [[ "${PKG_REFRESH_DONE[$backend]:-0}" == "1" ]]; then
+    return 0
+  fi
+
+  local state_file="${PKG_REFRESH_STATE_FILE:-}"
+  if [[ -n "$state_file" && -f "$state_file" ]]; then
+    grep -Fxq "$backend" "$state_file"
+    return $?
+  fi
+
+  return 1
+}
+
+pkg::mark_refresh_done() {
+  local backend="$1"
+
+  PKG_REFRESH_DONE[$backend]="1"
+
+  local state_file="${PKG_REFRESH_STATE_FILE:-}"
+  if [[ -n "$state_file" ]]; then
+    touch "$state_file"
+    if ! grep -Fxq "$backend" "$state_file"; then
+      printf "%s\n" "$backend" >> "$state_file"
+    fi
+  fi
+}
+
 # 检测可用包管理器并导出 PKG_MANAGER。
 # 参数:
 #   无
@@ -78,20 +132,73 @@ pkg::resolve_backend() {
 #   $1: backend
 pkg::refresh_once() {
   local backend="$1"
+  local pacman_mode=""
 
   [[ -n "$backend" ]] || return 0
-  [[ "${PKG_REFRESH_DONE[$backend]:-0}" == "1" ]] && return 0
+  pkg::is_refresh_done "$backend" && return 0
+
+  if ! pkg::refresh_enabled; then
+    pkg::mark_refresh_done "$backend"
+    return 0
+  fi
 
   case "$backend" in
     apt)
       privilege::as_root apt-get update -y
+      ;;
+    pacman)
+      pacman_mode="$(pkg::pacman_refresh_mode)"
+      case "$pacman_mode" in
+        sync)
+          privilege::as_root pacman -Sy --noconfirm
+          ;;
+        force)
+          privilege::as_root pacman -Syy --noconfirm
+          ;;
+        skip)
+          ;;
+      esac
+      ;;
+    dnf)
+      privilege::as_root dnf makecache -y
+      ;;
+    brew)
+      privilege::as_user brew update
+      ;;
+    yay)
+      cmd::require yay
+      pacman_mode="$(pkg::pacman_refresh_mode)"
+      case "$pacman_mode" in
+        sync)
+          privilege::as_user yay -Sy --noconfirm
+          ;;
+        force)
+          privilege::as_user yay -Syy --noconfirm
+          ;;
+        skip)
+          ;;
+      esac
+      ;;
+    paru)
+      cmd::require paru
+      pacman_mode="$(pkg::pacman_refresh_mode)"
+      case "$pacman_mode" in
+        sync)
+          privilege::as_user paru -Sy --noconfirm
+          ;;
+        force)
+          privilege::as_user paru -Syy --noconfirm
+          ;;
+        skip)
+          ;;
+      esac
       ;;
     *)
       # 其他 backend 目前不做统一 refresh。
       ;;
   esac
 
-  PKG_REFRESH_DONE[$backend]="1"
+  pkg::mark_refresh_done "$backend"
 }
 
 # 使用指定 backend 安装软件包。
@@ -104,13 +211,13 @@ pkg::install_with_backend() {
   local pkgs=("$@")
 
   [[ ${#pkgs[@]} -gt 0 ]] || return 0
+  pkg::refresh_once "$backend"
 
   case "$backend" in
     pacman)
       privilege::as_root pacman -S --noconfirm --needed "${pkgs[@]}"
       ;;
     apt)
-      pkg::refresh_once apt
       privilege::as_root apt-get install -y "${pkgs[@]}"
       ;;
     dnf)

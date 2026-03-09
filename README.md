@@ -107,6 +107,9 @@ printf '%s\n' "eza|现代 ls" "bat|语法高亮 cat" | \
 
 - `001-install-packages.sh` 会读取 `manifests/packages/*.txt`，支持多个文件。
 - 当前默认清单是 `base.txt`，用于 Linux 通用基础软件。
+- 安装按“每个清单文件”分别执行，不会把多个文件合并成一条安装命令。
+- 当 `PKG_INSTALL_LOG_ENABLE=1` 时，每个清单文件安装完成后会输出一条完成日志。
+- 当 `PKG_INSTALL_LOG_ENABLE=0` 时，仅输出实际执行命令（或 dry-run 命令）。
 - 顶级说明可用：`@desc: 说明文本`。
 - 软件包行格式：`package|os|pkg_manager|desc`。
 - `os` 可选，默认 `all`（支持：`all/linux/arch/ubuntu/debian/fedora/manjaro/endeavouros/pop/opensuse/nixos/macos`）。
@@ -114,6 +117,7 @@ printf '%s\n' "eza|现代 ls" "bat|语法高亮 cat" | \
 - `desc` 可选，用于安装前日志展示。
 - 字段包含竖线时使用 `\|` 转义。
 - `001-install-packages.sh` 会校验 `os/pkg_manager` 是否在支持列表内，非法值会直接报错中止。
+- 对带索引更新的包管理器（如 `apt/pacman/dnf/brew/yay/paru`），每次脚本运行只会刷新一次，不会每次安装都刷新。
 
 示例：
 
@@ -129,6 +133,9 @@ git|linux|auto|Git 版本管理工具
 - `PKG_INSTALL_LOG_ENABLE`：是否打印安装前计划日志（默认 `0`，开启用 `1`）
 - `PKG_OS_OVERRIDE`：强制系统过滤（如 `arch`、`ubuntu`、`all`），默认按当前系统自动匹配
 - `PKG_TARGET_OVERRIDE`：兼容旧变量名（建议迁移到 `PKG_OS_OVERRIDE`）
+- `PKG_REFRESH_ENABLE`：是否启用索引刷新（默认 `1`）
+- `PKG_PACMAN_REFRESH_MODE`：`pacman/yay/paru` 刷新模式（`sync`/`force`/`skip`，默认 `sync`）
+- 在 `setup.sh` 单次运行中，刷新状态会跨 func 共享，避免重复刷新。
 
 ## lib 命名约定
 
