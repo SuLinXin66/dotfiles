@@ -1,0 +1,11 @@
+# 默认基础工具
+@desc: Linux 通用基础工具
+
+curl|linux|auto|命令行网络下载工具
+wget|linux|auto|命令行网络下载工具（备用）
+git|linux|auto|Git 版本管理工具
+ca-certificates|linux|auto|HTTPS 证书集合
+rsync|linux|auto|文件同步工具
+unzip|linux|auto|zip 解压工具
+zip|linux|auto|zip 打包工具
+stow|linux|auto|dotfiles 软链接管理工具

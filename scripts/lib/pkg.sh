@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+declare -Ag PKG_REFRESH_DONE=()
+
 # 检测可用包管理器并导出 PKG_MANAGER。
 # 参数:
 #   无
@@ -21,6 +23,116 @@ pkg::detect_manager() {
   export PKG_MANAGER
 }
 
+# 检测可用 AUR 助手（优先 paru，其次 yay）。
+# 参数:
+#   无
+# 返回:
+#   输出助手名，若不存在则输出空字符串
+pkg::detect_aur_helper() {
+  if cmd::exists paru; then
+    printf "paru\n"
+    return 0
+  fi
+
+  if cmd::exists yay; then
+    printf "yay\n"
+    return 0
+  fi
+
+  printf "\n"
+}
+
+# 将声明的 backend 解析为最终 backend。
+# 参数:
+#   $1: 声明 backend（auto/pacman/aur/yay/paru/apt/dnf/brew）
+# 返回:
+#   输出最终 backend
+pkg::resolve_backend() {
+  local declared_backend="$1"
+  local native_manager aur_helper
+
+  declared_backend="${declared_backend:-auto}"
+
+  case "$declared_backend" in
+    auto)
+      pkg::detect_manager
+      native_manager="$PKG_MANAGER"
+      printf "%s\n" "$native_manager"
+      ;;
+    aur)
+      aur_helper="$(pkg::detect_aur_helper)"
+      [[ -n "$aur_helper" ]] || log::die "AUR backend requested but no helper found (paru/yay)"
+      printf "%s\n" "$aur_helper"
+      ;;
+    pacman|apt|dnf|brew|yay|paru)
+      printf "%s\n" "$declared_backend"
+      ;;
+    *)
+      log::die "Unsupported backend: $declared_backend"
+      ;;
+  esac
+}
+
+# 对需要索引更新的 backend 做“本轮仅一次”更新。
+# 参数:
+#   $1: backend
+pkg::refresh_once() {
+  local backend="$1"
+
+  [[ -n "$backend" ]] || return 0
+  [[ "${PKG_REFRESH_DONE[$backend]:-0}" == "1" ]] && return 0
+
+  case "$backend" in
+    apt)
+      privilege::as_root apt-get update -y
+      ;;
+    *)
+      # 其他 backend 目前不做统一 refresh。
+      ;;
+  esac
+
+  PKG_REFRESH_DONE[$backend]="1"
+}
+
+# 使用指定 backend 安装软件包。
+# 参数:
+#   $1: backend
+#   $@: 软件包名称列表
+pkg::install_with_backend() {
+  local backend="$1"
+  shift || true
+  local pkgs=("$@")
+
+  [[ ${#pkgs[@]} -gt 0 ]] || return 0
+
+  case "$backend" in
+    pacman)
+      privilege::as_root pacman -S --noconfirm --needed "${pkgs[@]}"
+      ;;
+    apt)
+      pkg::refresh_once apt
+      privilege::as_root apt-get install -y "${pkgs[@]}"
+      ;;
+    dnf)
+      privilege::as_root dnf install -y "${pkgs[@]}"
+      ;;
+    brew)
+      privilege::as_user brew install "${pkgs[@]}"
+      ;;
+    yay)
+      cmd::require yay
+      privilege::as_user yay -S --noconfirm --needed "${pkgs[@]}"
+      ;;
+    paru)
+      cmd::require paru
+      privilege::as_user paru -S --noconfirm --needed "${pkgs[@]}"
+      ;;
+    *)
+      log::die "Unsupported backend for install: $backend"
+      ;;
+  esac
+}
+
 # 安装软件包。
 # 参数:
 #   $@: 软件包名称列表
@@ -30,25 +142,8 @@ pkg::install() {
   local pkgs=("$@")
   [[ ${#pkgs[@]} -gt 0 ]] || return 0
 
-  pkg::detect_manager
-
-  case "$PKG_MANAGER" in
-    pacman)
-      privilege::as_root pacman -S --noconfirm --needed "${pkgs[@]}"
-      ;;
-    apt)
-      privilege::as_root apt-get update -y
-      privilege::as_root apt-get install -y "${pkgs[@]}"
-      ;;
-    dnf)
-      privilege::as_root dnf install -y "${pkgs[@]}"
-      ;;
-    brew)
-      privilege::as_user brew install "${pkgs[@]}"
-      ;;
-    *)
-      log::die "Unsupported package manager: $PKG_MANAGER"
-      ;;
-  esac
+  local backend
+  backend="$(pkg::resolve_backend auto)"
+  pkg::install_with_backend "$backend" "${pkgs[@]}"
 }
 

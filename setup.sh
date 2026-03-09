@@ -5,7 +5,7 @@ PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 RUN_FUNCS=(
   "000"
-  # "001"
+  "001"
 )
 
 # shellcheck source=/dev/null

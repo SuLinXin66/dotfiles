@@ -9,6 +9,8 @@
 ```text
 .
 ├── setup.sh                  # 标准入口
+├── new-func.sh               # 生成功能脚本模板（自动编号）
+├── new-pkg.sh                # 生成/追加软件清单（自动编号）
 ├── scripts/
 │   ├── lib/                  # 通用库（无业务）
 │   │   ├── export.sh         # 统一加载入口（固定顺序 source 其余库）
@@ -24,7 +26,7 @@
 │       └── 001-install-packages.sh
 ├── manifests/
 │   └── packages/
-│       └── default.txt       # 软件包清单（每行一个）
+│       └── base.txt          # Linux 通用基础软件清单
 └── dotfiles/                 # stow 包目录
 	└── .gitkeep
 ```
@@ -51,7 +53,31 @@
 
 - 传入不带序号的功能名。
 - 脚本会自动读取 `scripts/funcs` 中最大序号并 `+1`。
-- 生成的文件会自动包含统一参数解析与三钩子模板（`show_help/env_spec/run_impl/dry_run_impl`）。
+- 生成的文件会自动包含统一参数解析与四钩子模板（`show_help/env_spec/run_impl/dry_run_impl`）。
+
+## 创建/追加软件清单
+
+```bash
+./new-pkg.sh --manifest cli-base --title "基础命令行工具" --os all --pkg-manager auto \
+	"git|Git 版本管理工具" "curl|命令行下载工具"
+
+./new-pkg.sh --manifest base.txt --os arch --pkg-manager pacman \
+	"wl-clipboard|Wayland 剪贴板工具"
+
+printf '%s\n' "eza|现代 ls" "bat|语法高亮 cat" | \
+	./new-pkg.sh --manifest base.txt --os all --pkg-manager auto --stdin
+```
+
+- 使用 `--manifest` 指定清单：存在则追加，不存在则自动新建 `NNN-name.txt`。
+- 单次可以追加多条 `pkg|desc`。
+- 追加前会检查同名软件包冲突，存在即报错并拒绝写入。
+- 清单字段固定为 `package|os|pkg_manager|desc`。
+- `os` 支持：`all/linux/arch/ubuntu/debian/fedora/manjaro/endeavouros/pop/opensuse/nixos/macos`。
+- `pkg_manager` 支持 `auto/pacman/apt/dnf/brew/aur/yay/paru`。
+- 当 `pkg_manager=aur` 时，安装时自动优先使用 `paru`，否则回退 `yay`。
+- `package` 字段仅允许 `字母/数字/._:+-@`，非法字符会被拒绝。
+- 字段中如果需要字面量 `|`，请写 `\|`。
+- 字段中如果需要字面量 `\`，请写 `\\`。
 
 ## dotfiles 目录说明
 
@@ -76,6 +102,33 @@
 - 新增脚本建议固定四钩子：`show_help + env_spec + run_impl + dry_run_impl`。
 - 功能脚本入口建议直接使用一行：`cli::run_noargs_hooks "xxx.sh" show_help env_spec run_impl dry_run_impl "$@"`。
 - `setup.sh -h` 会按 `RUN_FUNCS` 顺序自动汇总并打印每个 func 的环境变量说明。
+
+## 软件清单格式
+
+- `001-install-packages.sh` 会读取 `manifests/packages/*.txt`，支持多个文件。
+- 当前默认清单是 `base.txt`，用于 Linux 通用基础软件。
+- 顶级说明可用：`@desc: 说明文本`。
+- 软件包行格式：`package|os|pkg_manager|desc`。
+- `os` 可选，默认 `all`（支持：`all/linux/arch/ubuntu/debian/fedora/manjaro/endeavouros/pop/opensuse/nixos/macos`）。
+- `pkg_manager` 可选，默认 `auto`。
+- `desc` 可选，用于安装前日志展示。
+- 字段包含竖线时使用 `\|` 转义。
+- `001-install-packages.sh` 会校验 `os/pkg_manager` 是否在支持列表内，非法值会直接报错中止。
+
+示例：
+
+```text
+@desc: Linux 通用基础工具
+curl|linux|auto|命令行网络下载工具
+git|linux|auto|Git 版本管理工具
+```
+
+`001` 相关环境变量：
+
+- `PKG_MANIFEST_DIR`：清单目录
+- `PKG_INSTALL_LOG_ENABLE`：是否打印安装前计划日志（默认 `0`，开启用 `1`）
+- `PKG_OS_OVERRIDE`：强制系统过滤（如 `arch`、`ubuntu`、`all`），默认按当前系统自动匹配
+- `PKG_TARGET_OVERRIDE`：兼容旧变量名（建议迁移到 `PKG_OS_OVERRIDE`）
 
 ## lib 命名约定
 

@@ -96,6 +96,7 @@ env::get() {
   local spec_func="$1"
   local key="$2"
   local default
+  local has_default="0"
 
   env::has_key "$spec_func" "$key" || {
     log::die "Unknown env key for ${spec_func}: ${key}"
@@ -106,9 +107,19 @@ env::get() {
     return 0
   fi
 
-  default="$(env::default_of "$spec_func" "$key" || true)"
+  if default="$(env::default_of "$spec_func" "$key" 2>/dev/null)"; then
+    has_default="1"
+  else
+    default=""
+  fi
+
   if [[ -n "$default" ]]; then
     printf "%s\n" "$default"
+    return 0
+  fi
+
+  if [[ "$has_default" == "1" ]]; then
+    printf "\n"
     return 0
   fi
 
