@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 MANIFEST_DIR="$PROJECT_ROOT/manifests/packages"
 
 readonly SUPPORTED_OS_LIST="all/linux/arch/ubuntu/debian/fedora/manjaro/endeavouros/pop/opensuse/nixos/macos"
@@ -10,7 +10,7 @@ readonly SUPPORTED_PKG_MANAGER_LIST="auto/pacman/apt/dnf/brew/aur/yay/paru"
 show_help() {
   cat <<'EOF'
 用法:
-  ./new-pkg.sh --manifest <name-or-file> [--title <text>] [--os <os>] [--pkg-manager <manager>] [--stdin] [<pkg|desc> ...]
+  ./helper/pkg.sh --manifest <name-or-file> [--title <text>] [--os <os>] [--pkg-manager <manager>] [--stdin] [<pkg|desc> ...]
 
 说明:
   1) 使用 --manifest 指定清单。
@@ -38,14 +38,14 @@ show_help() {
   若包含反斜杠，请使用 \\ 表示字面量反斜杠。
 
 示例:
-  ./new-pkg.sh --manifest cli-base --title "基础命令行工具" --os all --pkg-manager auto \
+  ./helper/pkg.sh --manifest cli-base --title "基础命令行工具" --os all --pkg-manager auto \
     "git|Git 版本管理" "curl|命令行下载"
 
-  ./new-pkg.sh --manifest 000-default.txt --os arch --pkg-manager pacman \
+  ./helper/pkg.sh --manifest base.txt --os arch --pkg-manager pacman \
     "wl-clipboard|Wayland 剪贴板" "fd|更快的 find"
 
   printf '%s\n' "eza|现代 ls" "bat|语法高亮 cat" | \
-    ./new-pkg.sh --manifest 000-default.txt --os all --pkg-manager auto --stdin
+    ./helper/pkg.sh --manifest base.txt --os all --pkg-manager auto --stdin
 EOF
 }
 

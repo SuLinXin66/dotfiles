@@ -9,8 +9,9 @@
 ```text
 .
 ├── setup.sh                  # 标准入口
-├── new-func.sh               # 生成功能脚本模板（自动编号）
-├── new-pkg.sh                # 生成/追加软件清单（自动编号）
+├── helper/
+│   ├── func.sh               # 生成功能脚本模板（自动编号）
+│   └── pkg.sh                # 生成/追加软件清单（自动编号）
 ├── scripts/
 │   ├── lib/                  # 通用库（无业务）
 │   │   ├── export.sh         # 统一加载入口（固定顺序 source 其余库）
@@ -48,7 +49,7 @@
 ## 创建功能脚本
 
 ```bash
-./new-func.sh install-fonts
+./helper/func.sh install-fonts
 ```
 
 - 传入不带序号的功能名。
@@ -58,14 +59,14 @@
 ## 创建/追加软件清单
 
 ```bash
-./new-pkg.sh --manifest cli-base --title "基础命令行工具" --os all --pkg-manager auto \
+./helper/pkg.sh --manifest cli-base --title "基础命令行工具" --os all --pkg-manager auto \
 	"git|Git 版本管理工具" "curl|命令行下载工具"
 
-./new-pkg.sh --manifest base.txt --os arch --pkg-manager pacman \
+./helper/pkg.sh --manifest base.txt --os arch --pkg-manager pacman \
 	"wl-clipboard|Wayland 剪贴板工具"
 
 printf '%s\n' "eza|现代 ls" "bat|语法高亮 cat" | \
-	./new-pkg.sh --manifest base.txt --os all --pkg-manager auto --stdin
+	./helper/pkg.sh --manifest base.txt --os all --pkg-manager auto --stdin
 ```
 
 - 使用 `--manifest` 指定清单：存在则追加，不存在则自动新建 `NNN-name.txt`。
@@ -136,6 +137,14 @@ git|linux|auto|Git 版本管理工具
 - `PKG_REFRESH_ENABLE`：是否启用索引刷新（默认 `1`）
 - `PKG_PACMAN_REFRESH_MODE`：`pacman/yay/paru` 刷新模式（`sync`/`force`/`skip`，默认 `sync`）
 - 在 `setup.sh` 单次运行中，刷新状态会跨 func 共享，避免重复刷新。
+
+## 扩展开发建议
+
+- 开发前先跑 `./setup.sh --dry-run`，确认将执行的步骤与命令。
+- 日常新增功能脚本用 `./helper/func.sh <name>`，不要手写序号。
+- 日常维护软件清单用 `./helper/pkg.sh --manifest ...`，避免手工编辑导致格式错误。
+- 需要详细日志时设置 `PKG_INSTALL_LOG_ENABLE=1`。
+- 仅验证安装流程不改系统时使用 `--dry-run`。
 
 ## lib 命名约定
 

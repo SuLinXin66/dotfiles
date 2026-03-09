@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 FUNCS_DIR="$PROJECT_ROOT/scripts/funcs"
 
 show_help() {
   cat <<'EOF'
-用法: ./new-func.sh <name>
+用法: ./helper/func.sh <name>
 
 说明:
   在 scripts/funcs 下创建新的编号模块脚本。
   传入名称不带序号，脚本会自动使用当前最大序号 + 1。
 
 示例:
-  ./new-func.sh sync-git-config
+  ./helper/func.sh sync-git-config
   -> scripts/funcs/002-sync-git-config.sh
 EOF
 }
