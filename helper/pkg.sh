@@ -10,13 +10,13 @@ readonly SUPPORTED_PKG_MANAGER_LIST="auto/pacman/apt/dnf/brew/aur/yay/paru"
 show_help() {
   cat <<'EOF'
 用法:
-  ./helper/pkg.sh --manifest <name-or-file> [--title <text>] [--os <os>] [--pkg-manager <manager>] [--stdin] [<pkg|desc> ...]
+  ./helper/pkg.sh --manifest <name-or-file> [--title <text>] [--os <os>] [--pkg-manager <manager>] [--stdin] [<pkg[|desc]> ...]
 
 说明:
   1) 使用 --manifest 指定清单。
      - 如果文件已存在: 追加
      - 如果文件不存在: 自动创建新的编号清单（NNN-name.txt）
-  2) 每个条目使用 pkg|desc，一次可追加多条。
+  2) 每个条目使用 pkg[|desc]，一次可追加多条。
   3) 追加前会检查清单内是否已存在同名包，存在则报错并终止。
 
 参数:
@@ -25,7 +25,7 @@ show_help() {
   --os         清单中的 os 字段，默认 all
   --pkg-manager 清单中的 pkg_manager 字段，默认 auto
   --manager    等价于 --pkg-manager
-  --stdin      从标准输入读取批量条目（每行一个 pkg|desc）
+  --stdin      从标准输入读取批量条目（每行一个 pkg[|desc]）
   -h, --help   显示帮助
 
 字段说明:
@@ -177,6 +177,19 @@ split_first_escaped_pipe() {
   out_right="$(trim_space "$current_right")"
 }
 
+parse_entry_pkg_desc() {
+  local item="$1"
+  local -n out_pkg_ref="$2"
+  local -n out_desc_ref="$3"
+
+  if split_first_escaped_pipe "$item" out_pkg_ref out_desc_ref; then
+    return 0
+  fi
+
+  out_pkg_ref="$(trim_space "$item")"
+  out_desc_ref=""
+}
+
 escape_field() {
   local s="$1"
   s="${s//\\/\\\\}"
@@ -320,7 +333,7 @@ ensure_no_pkg_conflict() {
   local -A incoming_pkgs=()
   local item pkg desc
   for item in "$@"; do
-    split_first_escaped_pipe "$item" pkg desc || die "条目格式错误（需 pkg|desc）: $item"
+    parse_entry_pkg_desc "$item" pkg desc
     [[ -n "$pkg" ]] || die "条目中的 package 不能为空: $item"
     validate_package_name "$pkg" || die "package 含非法字符，仅允许字母/数字/._:+-@: $pkg"
 
@@ -344,7 +357,7 @@ append_entries() {
 
   local item pkg desc pkg_out desc_out
   for item in "$@"; do
-    split_first_escaped_pipe "$item" pkg desc || die "条目格式错误（需 pkg|desc）: $item"
+    parse_entry_pkg_desc "$item" pkg desc
     [[ -n "$pkg" ]] || die "条目中的 package 不能为空: $item"
 
     pkg_out="$(escape_field "$pkg")"
@@ -418,7 +431,7 @@ main() {
 
   local -a input_entries=()
   collect_input_entries "$use_stdin" input_entries "$@"
-  [[ ${#input_entries[@]} -gt 0 ]] || die "至少提供一条 pkg|desc（参数或 --stdin）"
+  [[ ${#input_entries[@]} -gt 0 ]] || die "至少提供一条 pkg[|desc]（参数或 --stdin）"
 
   local target_file=""
   local created=0
