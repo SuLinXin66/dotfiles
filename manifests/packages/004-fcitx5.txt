@@ -1,0 +1,6 @@
+@desc: fcitx5输入法配置
+
+fcitx5-im|arch|pacman|fcitx5输入法框架
+fcitx5-chinese-addons|arch|pacman|fcitx5中文输入法插件
+fcitx5-rime|arch|pacman|fcitx5 Rime 输入法插件
+rime-ice-git|arch|pacman|rime输入法皮肤

@@ -1,0 +1,4 @@
+[general]
+copy-command = "wl-copy"
+focus-toggles-toolbars= true
+actions-on-right-click = ["save-to-clipboard"]

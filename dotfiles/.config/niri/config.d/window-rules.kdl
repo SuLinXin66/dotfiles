@@ -1,0 +1,100 @@
+// 窗口默认规则
+window-rule {
+    //圆角
+    geometry-corner-radius 12
+    //剪掉圆角外的窗口内容
+    clip-to-geometry true
+    //透明度
+    opacity 0.99
+    //禁止边框画到窗口后面
+    draw-border-with-background false
+    //prefer-no-csd
+}
+
+// 剪切板
+window-rule{
+    //用app-id指定窗口
+    match app-id="shorinclip"
+    // 默认长宽
+	  default-column-width { fixed 625; }
+    default-window-height { fixed 700; }
+    //以浮动模式打开
+    open-floating true
+    //默认打开位置，这里的x和y是偏移量。这里的例子是在顶部中心打开，y轴向下18个逻辑像素
+    default-floating-position x=0 y=18 relative-to="top"
+}
+
+// 截图便捷
+window-rule {
+  match app-id="satty"
+  open-floating true
+}
+
+// WPS协作
+window-rule {
+  match title="xz_helper"
+  match app-id="xz_helper"
+  open-floating true
+  default-floating-position x=18 y=18 relative-to="bottom-right" 
+  open-focused false
+}
+
+window-rule {
+  match app-id="xiezuo"
+  open-floating true
+  default-column-width { fixed 625; }
+  default-window-height { fixed 700; }
+}
+
+window-rule {
+  match title="图片"
+  match app-id="xz_helper"
+  open-floating true
+}
+
+// 壁纸
+window-rule {
+  match app-id="waypaper"
+  open-floating true
+}
+
+// 微信
+window-rule {
+  match app-id="wechat"
+  open-floating true
+  default-column-width { fixed 625; }
+  default-window-height { fixed 700; }
+}
+
+// thunar 文件管理器
+window-rule {
+  match app-id="thunar"
+  open-floating true
+  // default-column-width { fixed 625; }
+  // default-window-height { fixed 600; }
+}
+
+// 时钟
+window-rule {
+  match app-id="org.gnome.clocks"
+  open-floating true
+  default-column-width { fixed 625; }
+  default-window-height { fixed 700; }
+}
+
+// 日历
+window-rule {
+  match app-id="org.gnome.Calendar"
+  open-floating true
+  default-column-width { fixed 865; }
+  default-window-height { fixed 714; }
+}
+
+// clash-verge 代理
+window-rule {
+  match app-id="clash-verge"
+  open-floating true
+  default-column-width { fixed 800; }
+  default-window-height { fixed 600; }
+}
+

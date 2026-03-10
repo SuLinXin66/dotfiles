@@ -1,0 +1,3 @@
+@desc: tui终端工具
+
+btop|arch|pacman|终端系统监控工具

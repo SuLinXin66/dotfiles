@@ -1,0 +1,7 @@
+patch:
+  # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
+  __include: rime_ice_suggestion:/
+  schema_list:
+    - schema: rime_ice
+  menu:
+    page_size: 8

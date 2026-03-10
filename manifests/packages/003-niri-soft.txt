@@ -1,0 +1,48 @@
+@desc: niri常用软件包
+
+bazaar|arch|pacman|Gui store for flatpak software
+bluetui|arch|pacman|蓝牙tui工具
+bluez|arch|pacman|蓝牙协议栈
+bluetoothctl|arch|pacman|蓝牙命令行工具
+brightnessctl|arch|pacman|屏幕亮度调节工具
+cava|arch|pacman|终端音乐可视化工具
+cliphist|arch|pacman|剪贴板历史工具
+clipnotify|arch|pacman|剪贴板监视工具
+wl-clipboard|arch|pacman|Wayland 剪贴板工具
+xclip|arch|pacman|X11 剪贴板工具
+zoxide|arch|pacman|终端目录跳转工具
+grim|arch|pacman|Wayland 截图工具
+slurp|arch|pacman|Wayland 选择工具
+satty|arch|pacman|Wayland 终端工具
+wf-recorder|arch|pacman|Wayland 屏幕录制工具
+hyprlock|arch|pacman|Wayland 锁屏工具
+hyprpicker|arch|pacman|Wayland 颜色选择工具
+chafa|arch|pacman|终端图片显示工具
+timg|arch|pacman|终端图片显示工具
+imv|arch|pacman|终端图片查看工具
+imagemagick|arch|pacman|图片处理工具
+ffmpegthumbnailer|arch|pacman|图片缩略图工具
+waifu2x-ncnn-vulkan|arch|pacman|图片无损放大工具
+jq|arch|pacman|命令行 JSON 处理工具
+nwg-look|arch|pacman|Wayland 主题设置工具
+pacman-contrib|arch|pacman|pacman 贡献工具
+swayidle|arch|pacman|Wayland 屏幕空闲管理工具
+swayosd|arch|pacman|Wayland 屏幕显示工具
+ttf-jetbrains-mono-nerd|arch|pacman|JetBrains Mono 字体（Nerd 字体版本）
+otf-font-awesome|arch|pacman|Font Awesome 字体
+waybar|arch|pacman|Wayland 状态栏工具
+wlsunset|arch|pacman|Wayland 日夜模式工具
+xwayland-satellite|arch|pacman|Wayland X11 应用支持工具
+pavucontrol|arch|pacman|PulseAudio 音量控制工具
+shorin-contrib-git|arch|aur|Shorin 贡献工具
+clipsync-git|arch|aur|剪贴板同步工具
+shorinclip-git|arch|aur|Shorin 剪贴板工具
+ddcutil-service|arch|aur|DDC/CI 显示器控制工具
+matugen|arch|aur|终端音乐可视化工具
+python-pywalfox|arch|aur|Firefox 主题工具
+ttf-jetbrains-maple-mono-nf-xx-xx|arch|aur|JetBrains Mono Maple Mono 字体（Nerd 字体版本）
+ttf-lxgw-wenkai-screen|arch|aur|文泉驿等宽屏幕字体
+waybar-niri-taskbar-git|arch|aur|Waybar 任务栏模块
+swww|arch|aur|Wayland 壁纸工具
+waypaper|arch|aur|Wayland 壁纸工具
+wlogout|arch|aur|Wayland 锁屏工具

@@ -1,0 +1,14 @@
+@desc: niri基础软件包
+
+niri|arch|pacman|
+xwayland-satellite|arch|pacman|
+xdg-desktop-portal-gnome|arch|pacman|
+fuzzel|arch|pacman|
+kitty|arch|pacman|
+firefox|arch|pacman|
+pipewire-jack|arch|pacman|
+noto-fonts|arch|pacman|
+libnotify|arch|pacman|
+mako|arch|pacman|
+polkit-gnome|arch|pacman|
+swaylock-effects|arch|pacman|niri锁屏工具

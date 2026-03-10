@@ -1,0 +1,33 @@
+# -----------------------------------------------------
+# ALIASES
+# -----------------------------------------------------
+
+# -----------------------------------------------------
+# General
+# -----------------------------------------------------
+alias ..='cd ..'
+alias c='clear'
+alias nf='fastfetch'
+alias pf='fastfetch'
+alias ff='fastfetch'
+alias ls='eza -a --icons=always'
+alias ll='eza -al --icons=always'
+alias lt='eza -a --tree --level=1 --icons=always'
+alias shutdown='systemctl poweroff'
+# alias v='$EDITOR'
+# alias vim='$EDITOR'
+alias wifi='nmtui'
+
+# -----------------------------------------------------
+# System
+# -----------------------------------------------------
+alias update-grub='sudo grub-mkconfig -o /boot/grub/grub.cfg'
+
+alias vim='nvim'
+alias vi="nvim"
+
+alias ls="eza --icons --time-style +%Y-%m-%d\ %H:%M:%S"
+alias ll="ls -lh"
+alias la="ll -a"
+alias lg="la --git"
+alias tree="ls -T"

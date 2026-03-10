@@ -1,0 +1,16 @@
+@desc: thunar文件管理器
+
+xdg-desktop-portal-gtk|arch|pacman|
+thunar|arch|pacman|
+tumbler|arch|pacman|
+ffmpegthumbnailer|arch|pacman|
+poppler-glib|arch|pacman|
+gvfs-smb|arch|pacman|
+file-roller|arch|pacman|
+thunar-archive-plugin|arch|pacman|
+gnome-keyring|arch|pacman|
+thunar-volman|arch|pacman|
+gvfs-mtp|arch|pacman|
+gvfs-gphoto2|arch|pacman|
+webp-pixbuf-loader|arch|pacman|
+libgsf|arch|pacman|

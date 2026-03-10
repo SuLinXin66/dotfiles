@@ -4,8 +4,8 @@ set -Eeuo pipefail
 PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 RUN_FUNCS=(
-  "000"
   "001"
+  "000"
 )
 
 # shellcheck source=/dev/null
@@ -72,7 +72,7 @@ setup::print_env_help() {
       else
         printf "  - %s (必填): %s\n" "$key" "$desc"
       fi
-    done <<< "$raw"
+    done <<<"$raw"
   done
 }
 
