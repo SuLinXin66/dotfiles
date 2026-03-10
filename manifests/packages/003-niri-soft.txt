@@ -3,7 +3,7 @@
 bazaar|arch|pacman|Gui store for flatpak software
 bluetui|arch|pacman|蓝牙tui工具
 bluez|arch|pacman|蓝牙协议栈
-bluetoothctl|arch|pacman|蓝牙命令行工具
+brightnessctl|arch|pacman|蓝牙命令行工具
 brightnessctl|arch|pacman|屏幕亮度调节工具
 cava|arch|pacman|终端音乐可视化工具
 cliphist|arch|pacman|剪贴板历史工具
