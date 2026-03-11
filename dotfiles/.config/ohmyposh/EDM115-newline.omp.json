@@ -181,7 +181,7 @@
   "patch_pwsh_bleed": true,
   "final_space": true,
   "palette": {
-    "color0": "#121317",
+    "color0": "#131315",
     "color1": "",
     "color2": "",
     "color3": "",
@@ -191,11 +191,11 @@
     "color7": "",
     "color8": "",
     "color9": "",
-    "color10": "#a9c8ff",
+    "color10": "#bbc6e4",
     "color11": "",
     "color12": "",
-    "color13": "#001b3c",
+    "color13": "#101b32",
     "color14": "",
-    "color15": "#e2e2e7"
+    "color15": "#e4e2e4"
   }
 }
